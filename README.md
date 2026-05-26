@@ -27,7 +27,7 @@ Instead of importing raw operational tables directly into the BI engine, a struc
 ### 🕸️ Data Model Blueprint: Galaxy/Star Schema Architecture
 The analytical engine is organized under a **Galaxy Schema** (an advanced star-schema layout designed to support multiple, interconnected fact tables sharing dimension tables). 
 
-![Data Model / Star Schema](./images/Star_Schema.png)
+![Data Model / Star Schema](./images/Star_Chema.png)
 
 #### 🔗 Dimensional Relationship Mapping:
 Filters propagate efficiently through strict, single-direction (`1:N`) relationships from dimensions down to core facts, maintaining strict isolation of evaluation contexts:
