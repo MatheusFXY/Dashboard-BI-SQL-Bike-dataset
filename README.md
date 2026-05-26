@@ -1,132 +1,68 @@
-# 🚲 Bike Stores Sales & Inventory Analytics
+# 🚲 Bike Stores Data Engineering & Architecture
 
-This project delivers a comprehensive data analytics and business intelligence solution for a fictional retail network of bicycle stores. It integrates database management, data cleaning, advanced data modeling, and data storytelling to provide executive-level insights.
+This repository contains a robust, enterprise-grade Business Intelligence and Data Engineering solution developed for a retail network of bicycle stores. The project focuses on relational data abstraction, dimensional modeling, and strategic context handling to deliver a high-performance analytical environment.
 
-> ⚠️ **Note:** Since this is a portfolio project developed under a desktop license, a live cloud link is not available. To interact with the dashboard, please follow the execution steps below.
-
----
-
-## 🛠️ Tech Stack & Tools
-* **Data Visualization & Analytics:** Power BI Desktop
-* **Language:** DAX (Data Analysis Expressions) for advanced metrics and context control
-* **Database Management:** SQL Server (Transact-SQL) for data extraction and initial preparation
-* **Data Modeling:** Star Schema architecture with multiple fact tables
+> ⚠️ **Note:** This project was developed under a Power BI Desktop license, so a live cloud link is not available. To inspect the architecture, data model, and custom DAX measures, please follow the execution steps detailed below.
 
 ---
 
-## 🚀 How to Run and Interact with the Dashboard
+## 🛠️ Tech Stack & Implementation Details
 
-To explore the interactive charts, filters, and complete data structure, follow these steps:
+The project separates the data engineering/preparation layer from the visualization engine to guarantee scalability, performance, and clear business logic rules.
+
+* **SQL Server (Transact-SQL):** Utilized for database reverse engineering, schema abstraction, data cleaning (`CAST`, `CONCAT`, `COALESCE`, `NULLIF`), and compiling optimized analytical views (`vw_...`).
+* **Figma:** Used as the UI/UX design platform to architect user-centric layouts, wireframes, and custom dashboard backgrounds, reducing Power BI rendering overhead.
+* **Power BI Desktop:** Implemented as the primary analytics engine for semantic model building, relationship configurations, and canvas orchestration.
+* **DAX (Data Analysis Expressions):** Engineered to handle advanced calculations and evaluation context manipulation to bypass multi-fact table calculation boundaries (using `CALCULATE`, `SUMX`, `SUMMARIZE`, and `KEEPFILTERS`).
+
+---
+
+## 🏛️ Architecture & Data Modeling
+
+### 🧩 Relational Abstraction via SQL Views
+Instead of importing raw operational tables directly into the BI engine, a structural data abstraction layer was built in **SQL Server**. Nine specialized views (`CREATE VIEW`) were developed to streamline performance:
+* **Dim Tables:** Standardized dimensions for Stores, Customers, Staffs, Products, Brands, and Categories. These views handle string concatenations (e.g., creating `full_name`) and data cleansing (replacing missing phone/email logs) at the source level.
+* **Fact Tables:** Segmented facts handling distinct granularities: Inventory snapshots (`vw_Fact_Stocks`), Order Headers (`vw_Fact_Orders`), and Transactional Details (`vw_Fact_Order_Items`).
+
+### 🕸️ Data Model Blueprint: Galaxy/Star Schema Architecture
+The analytical engine is organized under a **Galaxy Schema** (an advanced star-schema layout designed to support multiple, interconnected fact tables sharing dimension tables). 
+
+![Data Model / Star Schema](./images/Star_Schema.png)
+
+#### 🔗 Dimensional Relationship Mapping:
+Filters propagate efficiently through strict, single-direction (`1:N`) relationships from dimensions down to core facts, maintaining strict isolation of evaluation contexts:
+* **Operational Filters:** `vw_Dim_Stores` filters both `vw_Fact_Stocks` and `vw_Fact_Orders` via `store_id`. `vw_Dim_Customers` and `vw_Dim_Staffs` filter `vw_Fact_Orders` via `customer_id` and `staff_id` respectively.
+* **Product Hierarchy (Snowflake Abstraction):** `vw_Dim_Brands` and `vw_Dim_Categories` filter `vw_Dim_Products`, which then filters the inventory records in `vw_Fact_Stocks` via `product_id`.
+* **Time Intelligence:** A custom `dCalendar` table engineered via Power Query acts as the single chronological source of truth, filtering `vw_Fact_Orders` via the `Date` key.
+
+#### ⚡ Fact-to-Fact Intersections & Cross-Filtering:
+* `vw_Fact_Order_Items` acts as the central transaction junction, bridging data directly to `vw_Fact_Orders` via `order_id` and connecting to `vw_Fact_Stocks` through an `N:N` relationship via `product_id`.
+* Bi-directional filtering is strategically enabled between these fact boundaries to allow cross-filtering capabilities between inventory availability and real-time sales revenue.
+
+---
+
+## 🎨 UI/UX Design Philosophy
+Every dashboard layout was custom-designed using **Figma** before visual development. This approach allowed for:
+* **Performance Optimization:** Flat image backgrounds reduce active visual rendering times.
+* **Consistent Visual Hierarchy:** Custom-built containers designed specifically for KPI cards, optimizing screen real estate, alignment, and cognitive scanability.
+
+---
+
+## 🚀 How to Run and Inspect the Project
+
+Follow these steps to download the file and review the active relationships, data types, and measures:
 
 ### 1. Prerequisites
 Ensure you have the following tool installed on your machine:
 * [Power BI Desktop](https://powerbi.microsoft.com/desktop/) (Free download from the Microsoft Store).
-* *(Optional)* [SQL Server Management Studio (SSMS)](https://learn.microsoft.com/sql/ssms/download-sql-server-management-studio-ssms) if you wish to inspect the data cleaning scripts located in the `data/` folder.
-
-### 2. Running the Project
-1. Clone this repository or download the files as a ZIP by clicking on the green **Code** button at the top right, then selecting **Download ZIP**.
-2. Navigate to the root folder of the project.
-3. Double-click the file named **`Painel de instrumentos da bicicleta.pbix`** (or your exact file name).
-4. Power BI Desktop will open the project automatically. All data, relationships, and custom metrics are fully embedded within the file—**no database connection or data source reconfiguration is required** to view and interact with the dashboard.
-
-# 🚲 Bike Stores Sales & Inventory Analytics
-
-This project delivers a comprehensive data analytics and business intelligence solution for a retail network of bicycle stores. It integrates database management, data cleaning, advanced data modeling, and data storytelling to provide executive-level insights.
-
-> ⚠️ **Note:** Since this is a portfolio project developed under a desktop license, a live cloud link is not available. To interact with the dashboard, please follow the execution steps below.
-
----
-
-## 🛠️ Tech Stack & Tools
-* **Data Visualization & Analytics:** Power BI Desktop
-* **Language:** DAX (Data Analysis Expressions) for advanced metrics and context control
-* **Database Management:** SQL Server (Transact-SQL) for data extraction, transformation, and cleaning
-* **Data Modeling:** Star Schema architecture with multiple fact tables
-
----
-
-## 🚀 How to Run and Interact with the Dashboard
-
-To explore the interactive charts, filters, and complete data structure, follow these steps:
-
-### 1. Prerequisites
-Ensure you have the following tool installed on your machine:
-* [Power BI Desktop](https://powerbi.microsoft.com/desktop/) (Free download from the Microsoft Store).
-* *(Optional)* [SQL Server Management Studio (SSMS)](https://learn.microsoft.com/sql/ssms/download-sql-server-management-studio-ssms) to inspect the data cleaning scripts located in the `data/` folder.
+* *(Optional)* [SQL Server Management Studio (SSMS)](https://learn.microsoft.com/sql/ssms/download-sql-server-management-studio-ssms) to inspect the view generation scripts located in the `data/` folder.
 
 ### 2. Running the Project
 1. Clone this repository or download the files as a ZIP by clicking on the green **Code** button at the top right, then selecting **Download ZIP**.
 2. Navigate to the root folder of the project.
 3. Double-click the file named **`Painel de instrumentos da bicicleta.pbix`**.
-4. Power BI Desktop will open the project automatically. All data, relationships, and custom metrics are fully embedded within the file—**no database connection or data source reconfiguration is required**.
+4. Power BI Desktop will open the project automatically. All data, relational links, and custom DAX measures are fully embedded within the file—**no server connection or data source reconfiguration is required to inspect the environment**.
 
 ---
 
-## 📊 Executive Analytics Report
-
-![Home Page](./images/Home%20Page.png)
-
----
-
-### 📈 Page 1: Executive Overview (Fiscal Year 2016 vs. 2017)
-
-![Page 1 Overview](./images/Pag1%20-%20Overview.png)
-
-#### 📅 Context & Data Constraints
-* This strategic analysis focuses heavily on **2017 vs. 2016** due to historical data integrity. 
-* **The 2018 Data Outlier:** The dataset contains records for 2018 only until April, followed by a total missing sequence from May onward. This indicates an incomplete data cycle rather than a commercial collapse. To avoid skewed historical trends, 2018 is isolated from the comparative growth metrics.
-
-#### 🚀 Financial Growth Drivers
-The fiscal year of 2017 comprehensively outperformed 2016 across all major indicators:
-* **Volume & Margins:** Total sales volume grew by **16.7%**, which successfully triggered an outstanding **42.0% increase in total net profit**.
-* **Aggressive Marketing Strategy:** This growth was fueled by a sharp **41.2% increase in promotional discounts**, boosting consumer demand and successfully scaling the **Average Ticket by 21.6%**.
-* **The June Peak:** June 2017 recorded a historical peak due to a heavy marketing campaign—discounts skyrocketed by **99.6%**, resulting in a **40.5% surge in sales volume** and a **79.9% revenue spike** compared to June 2016.
-
-#### 🚲 Brand & Product Trends
-* **The TREK Dominance:** Trek positioned itself as the powerhouse of the company, securing **70% of total corporate profit in 2017**. This is driven by its premium sports focus; **Road Bikes** alone represented **20% of total revenue** with an elite Average Ticket of **$3,742**.
-* **The Value Leader (Surly):** Surly optimized operational efficiency. Even with lower unit volumes than some competitors, it maintained superior or competitive revenue tiers, dominating the lifestyle segment with **Cruisers Bicycles** (10% of total revenue / $660 Average Ticket).
-* **Model Year Preference:** While older bike models (2016) still sustain high transactional volume, historical data shows that whenever a new model year is released (2017), consumers heavily shift preference to the latest release, driving higher profit margins per unit.
-* **Core Categories:** **Mountain Bikes** lead profitability (approx. 50% of corporate profit, driven by Trek), while **Cruisers** lead unit velocity (1,158 units sold, driven by Electra).
-* **The April Seasonality Peak:** April is consistently the highest-grossing month of the year. Immediately after April, the operation experiences a predictable contraction in both volume and revenue.
-* **Regional Dominance:** **New York (NY)** represents a staggering **77% of total profit share**, followed by California (CA), with Texas (TX) trailing in last place.
-
----
-
-### 🗺️ Page 2: Recipe Map (Geographical Sales Analysis)
-
-![Page 2 Recipe Map](./images/Pag2%20-%20Recipe%20Map.png)
-
-* **Linear Progression:** Analyzing all historical data across locations shows that sales distribution follows a steady, predictable linear progression. 
-* **Market Stability:** There are no erratic spikes or underperforming city outliers. Territory performance scales proportionally according to regional demographics, proving stable market penetration across all active states.
-
----
-
-### 📦 Page 3: Stock & Inventory Management
-
-![Page 3 Stock](./images/Pag3%20-%20Stock.png)
-
-* **Trek Overstock:** Aligning with sales dominance, **Trek** holds the highest capital tied up in inventory, valued at **$13 million (5,519 units)**. **Electra** follows in second place with **$4 million (4,988 units)**. 
-* **Category Layout:** Mountain Bikes and Cruisers remain the dominant categories taking up warehouse floor space across all store locations.
-* **The 2018 Inventory Backlog:** While 2016 models represent only 7.7% ($845k) and 2017 models represent 28% ($4M) of current stock, **2018 models account for a massive 64% of total inventory, valued at $13 million**. 
-* **Strategic Root Cause:** This massive stock accumulation perfectly correlates with the sudden data cutoff/sales drop after April 2018. The company aggressively purchased new inventory for the 2018 launch but could not log the corresponding sales, resulting in an artificial accounting backlog. It also proves that the company minimizes warehouse space for outdated models.
-
----
-
-### 👥 Page 4: Staff Performance & Operational Efficiency
-
-![Page 4 Staff](./images/Pag4%20-%20Staff.png)
-
-* **Symmetrical Output:** Each store operates with a lean team of exactly **2 employees**. 
-* **Process Standardization:** Individual performance metrics between peers in the same store are almost perfectly mirrored. This total lack of internal variance indicates a highly standardized corporate sales process and suggests a team-based, collaborative target structure rather than an aggressive individual commission model. Store location remains the primary driver of staff revenue generation.
-
----
-
-### 🛒 Page 5: Customer Behavior Analytics
-
-![Page 5 Customers](./images/Pag5%20-%20Customers.png)
-
-* **Low Frequency Trait:** The vast majority of the customer base are single-item buyers. Only a strict minority purchase bundles of 2 or 3 products in a single transaction. The absolute maximum threshold for a single checkout is **3 items**. 
-* **The April Consumer Pivot:** The "April Seasonality" theory is heavily reinforced here. In April, consumer behavior shifts drastically: the rate of single-item checkouts drops, transactions containing **2 items become the majority**, and **3-item bundles experience exponential growth**. This proves that April brings a heavy multi-buy promotional event.
-* **Client Revenue Curve:** Customer lifetime value follows a standard distribution with no volatile outliers, ranging from a top-tier account generating maximum revenue down to single casual transactions of $100.
-* **Demographic Target vs. High-Value Outliers:** * **Volume Focus:** **Mount Vernon (NY)** represents the ideal target hub with **20 unique high-value clients**, generating a consolidated **$105k**.
-  * **Value Focus:** **Middle Village** represents a premium outlier; it contains **only 1 unique customer** who single-handedly generated an impressive **$12k** in revenue.
+📈 **Looking for business insights?** Check out the full [Executive Analytics Report](./ANALYSIS.md) for a deep dive into sales seasonality, inventory backlogs, and customer behavior trends
